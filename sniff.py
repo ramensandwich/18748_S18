@@ -7,7 +7,7 @@ import ctypes
 import hashlib
 
 #modify the below URL to contact our server
-url = 'http://d3e46fa4.ngrok.io/18748.php'
+url = 'http://3e250a62.ngrok.io/18748.php'
 
 #A list of OUI IDs for companies that don't manufacture mobile devices
 BLACKLIST = {'74:da:38' : 'Edimax','b8:27:eb' : 'Raspberry Pi', 
@@ -34,7 +34,7 @@ def UpdateServer():
 
 
     try:
-        requests.post(url, data={"locationID":"Roboclub", "macs":macString})
+        requests.post(url, data={"locationID":"ABP", "macs":macString})
     except:
         print("Error sending to server!")
     
