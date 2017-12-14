@@ -19,7 +19,10 @@ macDict = {}
 
 def UpdateServer():
     print("Sending message to server with: %d value"%len(macDict))
-    requests.post(url, data={"id":5, "num_people":len(macDict)})
+    try:
+        requests.post(url, data={"id":5, "num_people":len(macDict)})
+    except:
+        print("Error sending to server!")
     for key, val in macDict.items():
         #Remove any devices we haven't seen in a while
         #Phones are chattier than laptops/pcs, so we can do rough filtering by frequency of probe requests
@@ -27,6 +30,9 @@ def UpdateServer():
         #print(timeDelta)
         if (timeDelta > 120):
             macDict.pop(key)
+    t = threading.Timer(10.0, UpdateServer)
+    t.start()
+
 
 def PacketHandler(pkt):
     if pkt.haslayer(Dot11):
@@ -35,6 +41,7 @@ def PacketHandler(pkt):
             dot11elt = pkt.getlayer(Dot11Elt)
             prismheader = pkt.getlayer(PrismHeader)
             rssi = ctypes.c_int32(prismheader.rssi).value
+            #TODO: Investigate why 71 is so prevalent as an RSSI value
             print("rssi: " + str(rssi))
             if (rssi <= -70): return
             while dot11elt:
@@ -71,15 +78,6 @@ def PrintPacket(pkt):
 
 t = threading.Timer(10.0, UpdateServer)
 t.start()
-UpdateServer()
-sniff(iface="ra0", prn=PacketHandler)
-while true:
-    t = threading.Timer(5.0, UpdateServer)
-    t.start()
 
-# The below lines are for local testing, not for actual packet capture
-# packets = rdpcap('/Users/Sean/Desktop/4-17-capture2.pcapng')
-# print("Done loading packets!")
-# for packet in packets:
-#     PacketHandler(packet)
-
+#IMPORTANT: sniff by default stores all packets it catches. This is bad for our embedded system
+sniff(iface="ra0", prn=PacketHandler, store=0)
