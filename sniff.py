@@ -1,7 +1,7 @@
 from scapy.all import *
 import requests
 import threading
-import time
+import time, datetime
 import signal, os
 
 #modify the below URL to contact our server
@@ -19,9 +19,12 @@ macDict = {}
 def UpdateServer():
     print("Sending message to server with: %d value"%len(macDict))
     requests.post(url, data={"id":5, "num_people":len(macDict)})
-    for key in macDict:
+    for key, val in macDict.items():
         #Remove any devices we haven't seen in a while
-        if (macDict[key] - time.clock() > 30):
+        #Phones are chattier than laptops/pcs, so we can do rough filtering by frequency of probe requests
+        timeDelta = (datetime.datetime.now() - val).seconds
+        #print(timeDelta)
+        if (timeDelta > 45):
             macDict.pop(key)
     t = threading.Timer(5.0, UpdateServer)
     t.start()
@@ -31,9 +34,7 @@ def PacketHandler(pkt):
         if pkt.type==PROBE_REQUEST_TYPE and pkt.subtype==PROBE_REQUEST_SUBTYPE and pkt.addr2[0:8] not in BLACKLIST:
             PrintPacket(pkt)
             if(pkt.addr2 not in macDict):
-                macDict[pkt.addr2] = time.clock()
-
-
+                macDict[pkt.addr2] = datetime.datetime.now()
 
 def PrintPacket(pkt):
     try:
@@ -47,7 +48,10 @@ def PrintPacket(pkt):
         print("No signal strength found")
     print "Target: %s Source: %s SSID: %s RSSI: %d"%(pkt.addr3, pkt.addr2, pkt.getlayer(Dot11ProbeReq).info, signal_strength)
 #    pkt.show()
-
+    dot11elt = pkt.getlayer(Dot11Elt)
+    while dot11elt:
+        print dot11elt.ID #, dot11elt.info
+        dot11elt = dot11elt.payload.getlayer(Dot11Elt)
 
 t = threading.Timer(10.0, UpdateServer)
 t.start()
