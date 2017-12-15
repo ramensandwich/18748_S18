@@ -7,7 +7,7 @@ import ctypes
 import hashlib
 
 #modify the below URL to contact our server
-url = 'http://cf43419f.ngrok.io/18748.php'
+url = 'http://d3e46fa4.ngrok.io/18748.php'
 
 #A list of OUI IDs for companies that don't manufacture mobile devices
 BLACKLIST = {'74:da:38' : 'Edimax','b8:27:eb' : 'Raspberry Pi', 
@@ -18,18 +18,25 @@ PROBE_REQUEST_SUBTYPE = 4
 
 macDict = {}
 
+LOG = open("logged.txt", "w")
+
 def UpdateServer():
     print("Sending message to server with: %d value"%len(macDict))
 
     #We don't want to transmit actual device MAC addresses, so we'll transmit a hash instead
     deviceHashes = []
-    for MACaddress in macDict.values:
+    for MACaddress in macDict.keys():
         deviceHashes.append(hashlib.md5(MACaddress).digest())
 
     try:
-        requests.post(url, data={"locationId":5, "deviceList":deviceHashes})
+        requests.post(url, data={"locationID":"Roboclub", "macAdresses":deviceHashes})
     except:
         print("Error sending to server!")
+    
+
+    LOG.write(str(len(macDict)) + ",")
+    LOG.flush()
+    
     for key, val in macDict.items():
         #Remove any devices we haven't seen in a while
         #Phones are chattier than laptops/pcs, so we can do rough filtering by frequency of probe requests
