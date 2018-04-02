@@ -1,12 +1,12 @@
-#18748 Spring 2018 Group 15 Presence detection
+# 18748 Spring 2018 Group 15 Presence detection
 
-###Problem introduction
+### Problem introduction
 People counting is an unsolved problem.  Current solutions range from primitive break-beam sensors to cameras backed with advanced computer vision algorithms.  We propose the monitoring of wireless internet traffic to determine the number of people in a given space. We believe this solution will be superior to existing ones because it *reduces cost* while achieving *higher accuracy* than current solutions.  We achieve lower setup costs by piggybacking off of existing wireless internet infrastructure, and achieve higher accuracy by precisely filtering and counting relevant devices.
 
-###Testing setup
+### Testing setup
 To set our theory, we utilize a network of Raspberry Pis connected to a central server.
 
-##Creating the kali linux images on Mac OS X
+## Creating the kali linux images on Mac OS X
 
 First, download the official Raspberry Pi 3 Kali Linux image off of the [official Kali Linux website:](https://docs.kali.org/kali-on-arm/install-kali-linux-arm-raspberry-pi)
 
@@ -23,7 +23,7 @@ Adjust the bs parameter according to the speed of your sd card.
 ** Note: name_of_sd_card_partition and name_of_sd_card are not necessarily the same. ** So if your sd card partition is called /dev/disk3s1, then the sd card may be called /dev/disk3
 
 
-##Starting the sniffer
+## Starting the sniffer
 
 On the command line, input the following, replacing "wlan-name" with the name of your wireless interface.
 
