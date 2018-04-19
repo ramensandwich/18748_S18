@@ -2,11 +2,14 @@ from scapy.all import *
 import requests
 import threading
 import time
+import signal, os
 
 #modify the below URL to contact our server
-url = 'http://a70f6c06.ngrok.io/18748.php'
+url = 'http://cf43419f.ngrok.io/18748.php'
 
-
+#A list of OUI IDs for companies that don't manufacture mobile devices
+BLACKLIST = {'74:da:38' : 'Edimax','b8:27:eb' : 'Raspberry Pi', 
+        '14:cc:20' : 'TPLink', '18:cf:5e' : 'Lite-on', '00:04:4b' : 'NVIDIA'}
 
 PROBE_REQUEST_TYPE = 0
 PROBE_REQUEST_SUBTYPE = 4
@@ -16,15 +19,21 @@ macDict = {}
 def UpdateServer():
     print("Sending message to server with: %d value"%len(macDict))
     requests.post(url, data={"id":5, "num_people":len(macDict)})
-    t = threading.Timer(10.0, UpdateServer)
+    for key in macDict:
+        #Remove any devices we haven't seen in a while
+        if (macDict[key] - time.clock() > 30):
+            macDict.pop(key)
+    t = threading.Timer(5.0, UpdateServer)
     t.start()
 
 def PacketHandler(pkt):
     if pkt.haslayer(Dot11):
-        if pkt.type==PROBE_REQUEST_TYPE and pkt.subtype==PROBE_REQUEST_SUBTYPE:
+        if pkt.type==PROBE_REQUEST_TYPE and pkt.subtype==PROBE_REQUEST_SUBTYPE and pkt.addr2[0:2] not in BLACKLIST :
+            #TODO: Verify why blacklist check isn't working
             PrintPacket(pkt)
             if(pkt.addr2 not in macDict):
-                macDict[pkt.addr2] = 1
+                macDict[pkt.addr2] = time.clock()
+
 
 
 def PrintPacket(pkt):
@@ -38,6 +47,8 @@ def PrintPacket(pkt):
         signal_strength = -100
         print("No signal strength found")
     print "Target: %s Source: %s SSID: %s RSSI: %d"%(pkt.addr3, pkt.addr2, pkt.getlayer(Dot11ProbeReq).info, signal_strength)
+#    pkt.show()
+
 
 #TODO: Change time value back to 30 or 60. 10 is for testing purposes
 #t = threading.Timer(10.0, UpdateServer)
