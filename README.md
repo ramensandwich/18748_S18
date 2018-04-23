@@ -8,7 +8,7 @@ To set our theory, we utilize a network of Raspberry Pis connected to a central 
 
 ## Creating the kali linux images on Mac OS X
 
-First, download the official Raspberry Pi 3 Kali Linux image off of the [official Kali Linux website:](https://docs.kali.org/kali-on-arm/install-kali-linux-arm-raspberry-pi)
+First, download the official Raspberry Pi 3 Kali Linux image off of the [official Kali Linux website](https://docs.kali.org/kali-on-arm/install-kali-linux-arm-raspberry-pi)
 
 Once you have an 8Gb (preferably larger) sd card inserted into your computer, find out which drive is the sd card with the following command:
 df -h
@@ -21,6 +21,10 @@ sudo dd if=path_to_kali.img of=/dev/name_of_sd_card bs=20m
 
 Adjust the bs parameter according to the speed of your sd card.
 ** Note: name_of_sd_card_partition and name_of_sd_card are not necessarily the same. ** So if your sd card partition is called /dev/disk3s1, then the sd card may be called /dev/disk3
+
+## Setting up the AC600 wireless dongle
+
+Sometimes Kali Linux does not have the necessary drivers to work with the AC600 because there are two chipsets for the same product. If plug-and-play does not work, then follow [these instructions](https://medium.com/@honsontran/installing-tp-link-archer-t2uh-ac600-on-vmware-for-kali-linux-4fa2db52cd69) 
 
 
 ## Starting the sniffer

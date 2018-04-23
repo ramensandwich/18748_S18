@@ -28,8 +28,7 @@ def UpdateServer():
 
 def PacketHandler(pkt):
     if pkt.haslayer(Dot11):
-        if pkt.type==PROBE_REQUEST_TYPE and pkt.subtype==PROBE_REQUEST_SUBTYPE and pkt.addr2[0:2] not in BLACKLIST :
-            #TODO: Verify why blacklist check isn't working
+        if pkt.type==PROBE_REQUEST_TYPE and pkt.subtype==PROBE_REQUEST_SUBTYPE and pkt.addr2[0:8] not in BLACKLIST:
             PrintPacket(pkt)
             if(pkt.addr2 not in macDict):
                 macDict[pkt.addr2] = time.clock()
@@ -50,9 +49,14 @@ def PrintPacket(pkt):
 #    pkt.show()
 
 
-#TODO: Change time value back to 30 or 60. 10 is for testing purposes
-#t = threading.Timer(10.0, UpdateServer)
-#t.start()
+t = threading.Timer(10.0, UpdateServer)
+t.start()
 UpdateServer()
 sniff(iface="ra0", prn=PacketHandler)
+
+# The below lines are for local testing, not for actual packet capture
+# packets = rdpcap('/Users/Sean/Desktop/4-17-capture2.pcapng')
+# print("Done loading packets!")
+# for packet in packets:
+#     PacketHandler(packet)
 
