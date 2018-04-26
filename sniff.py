@@ -23,8 +23,6 @@ def UpdateServer():
         #Remove any devices we haven't seen in a while
         if (macDict[key] - time.clock() > 30):
             macDict.pop(key)
-    t = threading.Timer(5.0, UpdateServer)
-    t.start()
 
 def PacketHandler(pkt):
     if pkt.haslayer(Dot11):
@@ -53,6 +51,9 @@ t = threading.Timer(10.0, UpdateServer)
 t.start()
 UpdateServer()
 sniff(iface="ra0", prn=PacketHandler)
+while true:
+    t = threading.Timer(5.0, UpdateServer)
+    t.start()
 
 # The below lines are for local testing, not for actual packet capture
 # packets = rdpcap('/Users/Sean/Desktop/4-17-capture2.pcapng')
