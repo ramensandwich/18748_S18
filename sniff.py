@@ -1,8 +1,9 @@
 from scapy.all import *
 import requests
 import threading
-import time
+import time, datetime
 import signal, os
+import ctypes
 
 #modify the below URL to contact our server
 url = 'http://cf43419f.ngrok.io/18748.php'
@@ -19,19 +20,32 @@ macDict = {}
 def UpdateServer():
     print("Sending message to server with: %d value"%len(macDict))
     requests.post(url, data={"id":5, "num_people":len(macDict)})
-    for key in macDict:
+    for key, val in macDict.items():
         #Remove any devices we haven't seen in a while
-        if (macDict[key] - time.clock() > 30):
+        #Phones are chattier than laptops/pcs, so we can do rough filtering by frequency of probe requests
+        timeDelta = (datetime.datetime.now() - val).seconds
+        #print(timeDelta)
+        if (timeDelta > 120):
             macDict.pop(key)
 
 def PacketHandler(pkt):
     if pkt.haslayer(Dot11):
         if pkt.type==PROBE_REQUEST_TYPE and pkt.subtype==PROBE_REQUEST_SUBTYPE and pkt.addr2[0:8] not in BLACKLIST:
-            PrintPacket(pkt)
-            if(pkt.addr2 not in macDict):
-                macDict[pkt.addr2] = time.clock()
-
-
+            #PrintPacket(pkt)
+            dot11elt = pkt.getlayer(Dot11Elt)
+            prismheader = pkt.getlayer(PrismHeader)
+            rssi = ctypes.c_int32(prismheader.rssi).value
+            print("rssi: " + str(rssi))
+            if (rssi <= -70): return
+            while dot11elt:
+                if (dot11elt.ID == 221):
+                    vendInfo = ''.join(["%02X" % ord(x) for x in dot11elt.info]).strip()
+                    #print(vendInfo[0:6])
+                    if(vendInfo[0:6] == "0050F2"):
+                        macDict[pkt.addr2] = datetime.datetime.now()
+                        print("Device MAC: " + str(pkt.addr2))
+                        return
+                dot11elt = dot11elt.payload.getlayer(Dot11Elt)
 
 def PrintPacket(pkt):
     try:
@@ -45,7 +59,15 @@ def PrintPacket(pkt):
         print("No signal strength found")
     print "Target: %s Source: %s SSID: %s RSSI: %d"%(pkt.addr3, pkt.addr2, pkt.getlayer(Dot11ProbeReq).info, signal_strength)
 #    pkt.show()
-
+    dot11elt = pkt.getlayer(Dot11Elt)
+    while dot11elt:
+        if (dot11elt.ID == 221):
+            print("Vendor specific!")
+            print(len(dot11elt.info))
+            vendInfo = ''.join( [ "%02X " % ord(x) for x in dot11elt.info ]).strip()
+            print(vendInfo)
+        print dot11elt.ID #, dot11elt.info
+        dot11elt = dot11elt.payload.getlayer(Dot11Elt)
 
 t = threading.Timer(10.0, UpdateServer)
 t.start()
