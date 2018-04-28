@@ -4,6 +4,7 @@ import threading
 import time, datetime
 import signal, os
 import ctypes
+import hashlib
 
 #modify the below URL to contact our server
 url = 'http://cf43419f.ngrok.io/18748.php'
@@ -19,8 +20,14 @@ macDict = {}
 
 def UpdateServer():
     print("Sending message to server with: %d value"%len(macDict))
+
+    #We don't want to transmit actual device MAC addresses, so we'll transmit a hash instead
+    deviceHashes = []
+    for MACaddress in macDict.values:
+        deviceHashes.append(hashlib.md5(MACaddress).digest())
+
     try:
-        requests.post(url, data={"id":5, "num_people":len(macDict)})
+        requests.post(url, data={"locationId":5, "deviceList":deviceHashes})
     except:
         print("Error sending to server!")
     for key, val in macDict.items():
