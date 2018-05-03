@@ -28,8 +28,13 @@ def UpdateServer():
     for MACaddress in macDict.keys():
         deviceHashes.append(hashlib.md5(MACaddress).digest())
 
+    macString = ''.join(x + ',' for x in macDict.keys())[0:-1]
+
+    print(macString)
+
+
     try:
-        requests.post(url, data={"locationID":"Roboclub", "macAdresses":deviceHashes})
+        requests.post(url, data={"locationID":"Roboclub", "macs":macString})
     except:
         print("Error sending to server!")
     
