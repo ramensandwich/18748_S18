@@ -11,16 +11,18 @@ To set our theory, we utilize a network of Raspberry Pis connected to a central 
 First, download the official Raspberry Pi 3 Kali Linux image off of the [official Kali Linux website](https://docs.kali.org/kali-on-arm/install-kali-linux-arm-raspberry-pi)
 
 Once you have an 8Gb (preferably larger) sd card inserted into your computer, find out which drive is the sd card with the following command:
-df -h
+```df -h```
+
+**note: name_of_sd_card_partition and name_of_sd_card are not necessarily the same.** So if your sd card partition is called /dev/disk3s1, then the sd card may be called /dev/disk3
 
 Once you've found the diskname of the sd card, run:
-sudo diskutil unmount /dev/name_of_sd_card_partition
+```sudo diskutil unmount /dev/name_of_sd_card_partition```
 
 Lastly, to put the image on the sd card:
+```
 sudo dd if=path_to_kali.img of=/dev/name_of_sd_card bs=20m
-
-Adjust the bs parameter according to the speed of your sd card.
-** Note: name_of_sd_card_partition and name_of_sd_card are not necessarily the same. ** So if your sd card partition is called /dev/disk3s1, then the sd card may be called /dev/disk3
+```
+Adjust the bs parameter according to the speed of your sd card. This step can take more than 15 minutes. Using ctrl+t shows the imaging progress.
 
 ## Setting up the AC600 wireless dongle
 
@@ -30,8 +32,9 @@ Sometimes Kali Linux does not have the necessary drivers to work with the AC600 
 ## Starting the sniffer
 
 On the command line, input the following, replacing "wlan-name" with the name of your wireless interface.
-
+```
 ifconfig wlan-name down
 iwconfig wlan-name mode monitor
 ifconfig wlan-name up
+```
 
